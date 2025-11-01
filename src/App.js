@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import CountryList from './componenets/CountryList';
-import CountryDetail from './components/CountryDetail';
-import About from './components/About';
+import CountryDetail from './componenets/CountryDetail';
+import About from './componenets/About';
 
 function App() {
   return (
