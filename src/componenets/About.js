@@ -1,4 +1,28 @@
 const About = () => {
+
+  function getCOuntryData() {
+
+    return new Promise ((resolve,reject) => {
+      fetch ('https://www.apicountries.com/countries').
+      then((res) => {
+        if(!res.ok) {
+          reject ('Failed to fetch country data');
+        }
+        return res.json();
+      }).then((data) => {
+        resolve (data);
+      }).catch((err) => {
+        reject ('Error fetching country data');
+      });
+    });
+  }
+
+  const data2 = getCOuntryData().then((data) => {
+    console.log ('Country data in about page', data);
+  }).catch((err) => {
+    console.error (err);
+  });
+  console.log ('Data2 is', data2);    
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">About Countries Explorer</h1>

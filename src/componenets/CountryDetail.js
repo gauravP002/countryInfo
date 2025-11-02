@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 const CountryDetail = () => {
   const { name } = useParams();
-  const [country, setCountry] = useState({});
+  const navigate = useNavigate();
+  const [country, setCountry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [allData, setAllData] = useState([]);
 
+  // fetch country whenever the route name changes
   useEffect(() => {
     const fetchCountry = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch(`https://www.apicountries.com/countries`);
         const data = await response.json();
-        console.log("country Info is", data);
-       const countryData = data.filter(c => c.name === name)[0];
-        setCountry(countryData);
+        setAllData(data);
+        const countryData = data.find(c => c.name === name);
+        if (!countryData) {
+          setError('Country not found');
+          setCountry(null);
+        } else {
+          setCountry(countryData);
+        }
       } catch (err) {
         setError('Failed to load country details');
         console.error('Error fetching country:', err);
@@ -25,7 +34,27 @@ const CountryDetail = () => {
     };
 
     fetchCountry();
-  }, []);
+  }, [name]);
+
+  // fetch a border country by its alpha3Code and navigate to it
+  const fetchBorder = async (alpha3Code) => {
+    try {
+      setLoading(true);
+      const borderData = allData.find(c => c.alpha3Code === alpha3Code);
+      if (borderData) {
+        // update view and route
+        setCountry(borderData);
+        navigate(`/country/${borderData.name}`);
+      } else {
+        setError('Border country not found');
+      }
+    } catch (err) {
+      console.error('Error fetching border country:', err);
+      setError('Failed to load border country');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -56,39 +85,39 @@ const CountryDetail = () => {
         <div className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <img
-              src={country.flags.png}
-              alt={`Flag of ${country.name}`}
+              src={country?.flags?.png}
+              alt={`Flag of ${country?.name}`}
               className="w-full md:w-72 h-48 object-cover rounded-lg shadow-md"
             />
 
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">{country.name}</h1>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-4">{country?.name}</h1>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <p className="text-slate-600 dark:text-slate-300">
-                    <span className="font-semibold">Capital:</span> {country.capital || '—'}
+                    <span className="font-semibold">Capital:</span> {country?.capital || '—'}
                   </p>
                   <p className="text-slate-600 dark:text-slate-300">
                     <span className="font-semibold">Population:</span>{' '}
-                    {country.population?.toLocaleString() || '—'}
+                    {country?.population?.toLocaleString() || '—'}
                   </p>
                   <p className="text-slate-600 dark:text-slate-300">
                     <span className="font-semibold">Area:</span>{' '}
-                    {country.area ? `${country.area.toLocaleString()} km²` : '—'}
+                    {country?.area ? `${country.area.toLocaleString()} km²` : '—'}
                   </p>
                 </div>
                 
                 <div className="space-y-3">
                   <p className="text-slate-600 dark:text-slate-300">
-                    <span className="font-semibold">Region:</span> {country.region || '—'}
+                    <span className="font-semibold">Region:</span> {country?.region || '—'}
                   </p>
                   <p className="text-slate-600 dark:text-slate-300">
-                    <span className="font-semibold">Subregion:</span> {country.subregion || '—'}
+                    <span className="font-semibold">Subregion:</span> {country?.subregion || '—'}
                   </p>
                   <p className="text-slate-600 dark:text-slate-300">
                     <span className="font-semibold">Languages:</span>{' '}
-                    {country.languages?.map(lang => lang.name).join(', ') || '—'}
+                    {country?.languages?.map(lang => lang.name).join(', ') || '—'}
                   </p>
                 </div>
               </div>
@@ -99,36 +128,41 @@ const CountryDetail = () => {
         <div className="p-6">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Additional Information</h2>
           <p className="text-slate-600 dark:text-slate-300">
-            <span className="font-semibold">Demonym:</span> {country.demonym || '—'}
+            <span className="font-semibold">Demonym:</span> {country?.demonym || '—'}
           </p>
           <p className="text-slate-600 dark:text-slate-300">
             <span className="font-semibold">Timezones:</span>{' '}
-            {country.timezones?.join(', ') || '—'}
+            {country?.timezones?.join(', ') || '—'}
           </p>
         </div>
 
         <div className="p-6">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Currencies</h2>
             <ul className="list-disc list-inside">
-              {country.currencies?.map(currency => (
+              {country?.currencies?.length ? country.currencies.map(currency => (
                 <li key={currency.code} className="text-slate-600 dark:text-slate-300">
                   <span className="font-semibold">{currency.name}</span> ({currency.code})
                 </li>
-              )) || '—'}
+              )) : <li className="text-slate-600 dark:text-slate-300">—</li>}
             </ul>   
         </div>
 
         <p className="p-6">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">Native Name:</span> {country.nativeName || '—'}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">Native Name:</span> {country?.nativeName || '—'}
         </p>
 
         <div className="p-6">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Border Countries</h2>
-            {country.borders?.length ? (
-              <ul className="list-disc list-inside">
-                {country.borders.map(border => (
-                  <li key={border} className="text-slate-600 dark:text-slate-300">
-                    {border}
+            {country?.borders?.length ? (
+              <ul className="flex flex-wrap gap-2">
+                {country.borders.map(code => (
+                  <li key={code}>
+                    <button
+                      onClick={() => fetchBorder(code)}
+                      className="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded hover:bg-slate-200 dark:hover:bg-slate-600"
+                    >
+                      {code}
+                    </button>
                   </li>
                 ))}
               </ul>
