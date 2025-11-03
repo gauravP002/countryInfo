@@ -130,10 +130,6 @@ const CountryDetail = () => {
           <p className="text-slate-600 dark:text-slate-300">
             <span className="font-semibold">Demonym:</span> {country?.demonym || '—'}
           </p>
-          <p className="text-slate-600 dark:text-slate-300">
-            <span className="font-semibold">Timezones:</span>{' '}
-            {country?.timezones?.join(', ') || '—'}
-          </p>
         </div>
 
         <div className="p-6">
