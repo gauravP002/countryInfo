@@ -3,6 +3,7 @@ import './App.css';
 import CountryList from './componenets/CountryList';
 import CountryDetail from './componenets/CountryDetail';
 import About from './componenets/About';
+import Todo from './componenets/Todo';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<CountryList />} />
             <Route path="/country/:name" element={<CountryDetail />} />
             <Route path="/about" element={<About />} />
+             <Route path="/todo" element={<Todo />} />
           </Routes>
         </main>
       </div>
